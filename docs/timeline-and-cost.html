@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Vision Ability — Development Timeline & Cost Estimate</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 20mm 18mm;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+            color: #1a1a1a;
+            line-height: 1.5;
+            padding: 40px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 3px solid #005EB8;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        .logo {
+            font-size: 28px;
+            font-weight: 800;
+            color: #005EB8;
+            letter-spacing: -0.5px;
+        }
+        .logo span { color: #FFD700; }
+        .doc-info {
+            text-align: right;
+            font-size: 12px;
+            color: #666;
+        }
+        .doc-info strong {
+            display: block;
+            font-size: 14px;
+            color: #333;
+        }
+
+        h1 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 6px;
+        }
+        .doc-subtitle {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        h2 {
+            font-size: 17px;
+            font-weight: 700;
+            color: #005EB8;
+            margin-top: 28px;
+            margin-bottom: 12px;
+            padding-bottom: 4px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            margin-bottom: 20px;
+        }
+        thead th {
+            background: #005EB8;
+            color: #fff;
+            font-weight: 600;
+            padding: 10px 12px;
+            text-align: left;
+        }
+        thead th:last-child,
+        thead th:nth-child(2),
+        thead th:nth-child(3),
+        thead th:nth-child(4) {
+            text-align: center;
+        }
+        tbody td {
+            padding: 9px 12px;
+            border-bottom: 1px solid #e8e8e8;
+        }
+        tbody td:nth-child(2),
+        tbody td:nth-child(3),
+        tbody td:nth-child(4) {
+            text-align: center;
+        }
+        tbody tr:nth-child(even) {
+            background: #f7f9fc;
+        }
+        tbody tr.total-row {
+            background: #eef3fa;
+            font-weight: 700;
+        }
+        tbody tr.total-row td {
+            border-top: 2px solid #005EB8;
+            border-bottom: 2px solid #005EB8;
+            padding: 11px 12px;
+        }
+
+        /* Gantt Chart */
+        .gantt {
+            width: 100%;
+            margin: 16px 0 24px;
+        }
+        .gantt-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+        .gantt-label {
+            width: 160px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #333;
+            flex-shrink: 0;
+        }
+        .gantt-track {
+            flex: 1;
+            height: 24px;
+            background: #f0f0f0;
+            border-radius: 4px;
+            position: relative;
+        }
+        .gantt-bar {
+            height: 100%;
+            border-radius: 4px;
+            position: absolute;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 700;
+            color: #fff;
+        }
+        .gantt-months {
+            display: flex;
+            margin-left: 160px;
+            margin-bottom: 6px;
+        }
+        .gantt-month {
+            flex: 1;
+            font-size: 10px;
+            color: #888;
+            text-align: center;
+            border-left: 1px solid #e0e0e0;
+            padding-left: 4px;
+        }
+        .gantt-month:first-child { border-left: none; }
+
+        .c0 { background: #1a3a5c; }
+        .c1 { background: #005EB8; }
+        .c2 { background: #0078d4; }
+        .c3 { background: #00a86b; }
+        .c4 { background: #e6a817; }
+        .c5 { background: #c0392b; }
+
+        /* Summary boxes */
+        .summary-grid {
+            display: flex;
+            gap: 16px;
+            margin: 20px 0 26px;
+        }
+        .summary-box {
+            flex: 1;
+            background: #f7f9fc;
+            border: 1px solid #d8e2ef;
+            border-radius: 10px;
+            padding: 18px;
+            text-align: center;
+        }
+        .summary-box .value {
+            font-size: 30px;
+            font-weight: 800;
+            color: #005EB8;
+        }
+        .summary-box .label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 4px;
+        }
+        .summary-box.highlight {
+            background: #005EB8;
+            border-color: #005EB8;
+        }
+        .summary-box.highlight .value { color: #fff; }
+        .summary-box.highlight .label { color: rgba(255,255,255,0.8); }
+
+        /* Task list */
+        .task-list {
+            font-size: 12px;
+            color: #444;
+            line-height: 1.7;
+            padding-left: 18px;
+        }
+        .task-list li {
+            margin-bottom: 2px;
+        }
+
+        /* Assumptions */
+        .assumptions {
+            background: #f7f9fc;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 16px 20px;
+            margin-top: 20px;
+            font-size: 12px;
+            color: #555;
+        }
+        .assumptions h3 {
+            font-size: 13px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 8px;
+        }
+        .assumptions ul {
+            padding-left: 18px;
+            line-height: 1.8;
+        }
+
+        /* Running costs */
+        .running-costs {
+            margin-top: 8px;
+        }
+        .running-costs td:last-child {
+            text-align: right;
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: 36px;
+            padding-top: 16px;
+            border-top: 1px solid #ddd;
+            font-size: 11px;
+            color: #999;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* Print-specific */
+        @media print {
+            body { padding: 0; }
+            .page-break { page-break-before: always; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div class="logo">Vision<span> Ability</span></div>
+    <div class="doc-info">
+        <strong>Development Timeline & Cost Estimate</strong>
+        Prepared: 10 February 2026<br>
+        Version: 1.0
+    </div>
+</div>
+
+<h1>Development Plan</h1>
+<p class="doc-subtitle">Universal iOS &amp; Android accessibility app — voice-guided London navigation &amp; NHS portal access</p>
+
+<!-- Summary boxes -->
+<div class="summary-grid">
+    <div class="summary-box">
+        <div class="value">46</div>
+        <div class="label">Development Days</div>
+    </div>
+    <div class="summary-box">
+        <div class="value">6 mo</div>
+        <div class="label">Timeline (2 days/week)</div>
+    </div>
+    <div class="summary-box highlight">
+        <div class="value">£23,000</div>
+        <div class="label">Total MVP Cost</div>
+    </div>
+</div>
+
+<!-- Phase breakdown -->
+<h2>Phase Breakdown</h2>
+
+<table>
+    <thead>
+        <tr>
+            <th>Phase</th>
+            <th>Days</th>
+            <th>Weeks</th>
+            <th>Cost</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><strong>Phase 0:</strong> Foundation &amp; Setup</td>
+            <td>2</td>
+            <td>1</td>
+            <td>£1,000</td>
+        </tr>
+        <tr>
+            <td><strong>Phase 1:</strong> Voice Engine</td>
+            <td>5.5</td>
+            <td>3</td>
+            <td>£2,750</td>
+        </tr>
+        <tr>
+            <td><strong>Phase 2:</strong> Navigation Feature</td>
+            <td>9</td>
+            <td>4.5</td>
+            <td>£4,500</td>
+        </tr>
+        <tr>
+            <td><strong>Phase 3:</strong> NHS Portal (WebView)</td>
+            <td>10.5</td>
+            <td>5.5</td>
+            <td>£5,250</td>
+        </tr>
+        <tr>
+            <td><strong>Phase 4:</strong> Polish &amp; UX</td>
+            <td>7.5</td>
+            <td>4</td>
+            <td>£3,750</td>
+        </tr>
+        <tr>
+            <td><strong>Phase 5:</strong> Testing &amp; Launch</td>
+            <td>11.5</td>
+            <td>6</td>
+            <td>£5,750</td>
+        </tr>
+        <tr class="total-row">
+            <td>MVP Total</td>
+            <td>46</td>
+            <td>24</td>
+            <td>£23,000</td>
+        </tr>
+    </tbody>
+</table>
+
+<!-- Gantt Chart -->
+<h2>Visual Timeline</h2>
+
+<div class="gantt">
+    <div class="gantt-months">
+        <div class="gantt-month">Feb</div>
+        <div class="gantt-month">Mar</div>
+        <div class="gantt-month">Apr</div>
+        <div class="gantt-month">May</div>
+        <div class="gantt-month">Jun</div>
+        <div class="gantt-month">Jul</div>
+        <div class="gantt-month">Aug</div>
+    </div>
+    <!-- Total width = 24 weeks, each week = 100/24 = 4.17% -->
+    <div class="gantt-row">
+        <div class="gantt-label">0. Setup</div>
+        <div class="gantt-track">
+            <div class="gantt-bar c0" style="left:0%; width:4.2%;">1w</div>
+        </div>
+    </div>
+    <div class="gantt-row">
+        <div class="gantt-label">1. Voice Engine</div>
+        <div class="gantt-track">
+            <div class="gantt-bar c1" style="left:4.2%; width:12.5%;">3w</div>
+        </div>
+    </div>
+    <div class="gantt-row">
+        <div class="gantt-label">2. Navigation</div>
+        <div class="gantt-track">
+            <div class="gantt-bar c2" style="left:16.7%; width:18.75%;">4.5w</div>
+        </div>
+    </div>
+    <div class="gantt-row">
+        <div class="gantt-label">3. NHS Portal</div>
+        <div class="gantt-track">
+            <div class="gantt-bar c3" style="left:35.4%; width:22.9%;">5.5w</div>
+        </div>
+    </div>
+    <div class="gantt-row">
+        <div class="gantt-label">4. Polish &amp; UX</div>
+        <div class="gantt-track">
+            <div class="gantt-bar c4" style="left:58.3%; width:16.7%;">4w</div>
+        </div>
+    </div>
+    <div class="gantt-row">
+        <div class="gantt-label">5. Testing &amp; Launch</div>
+        <div class="gantt-track">
+            <div class="gantt-bar c5" style="left:75%; width:25%;">6w</div>
+        </div>
+    </div>
+</div>
+
+<!-- Detailed tasks -->
+<h2>Key Deliverables per Phase</h2>
+
+<table>
+    <thead>
+        <tr>
+            <th>Phase</th>
+            <th colspan="3">Deliverables</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td style="width:30%"><strong>Phase 0</strong><br>Foundation</td>
+            <td colspan="3">
+                <ul class="task-list">
+                    <li>Expo + TypeScript project scaffold with CI/CD (EAS Build)</li>
+                    <li>Design system: high-contrast themes, large touch targets, semantic markup</li>
+                    <li>Backend API proxy (Node.js) &amp; TfL API registration</li>
+                </ul>
+            </td>
+        </tr>
+        <tr>
+            <td><strong>Phase 1</strong><br>Voice Engine</td>
+            <td colspan="3">
+                <ul class="task-list">
+                    <li>On-device speech recognition (STT) &amp; text-to-speech (TTS)</li>
+                    <li>Intent parsing: natural language → structured commands</li>
+                    <li>Multi-turn conversation flow &amp; voice command system</li>
+                    <li>Haptic feedback &amp; audio cues</li>
+                </ul>
+            </td>
+        </tr>
+        <tr>
+            <td><strong>Phase 2</strong><br>Navigation</td>
+            <td colspan="3">
+                <ul class="task-list">
+                    <li>TfL Journey Planner integration with voice-guided step-by-step directions</li>
+                    <li>Transport mode selection via voice (bus, tube, walking)</li>
+                    <li>Favourite destinations ("take me home") &amp; journey history</li>
+                    <li>High-contrast journey display for partially sighted users</li>
+                </ul>
+            </td>
+        </tr>
+        <tr>
+            <td><strong>Phase 3</strong><br>NHS Portal</td>
+            <td colspan="3">
+                <ul class="task-list">
+                    <li>NHS App website embedded via WebView with voice overlay</li>
+                    <li>Page content extraction &amp; summarisation (read aloud)</li>
+                    <li>Voice commands: "read messages", "request prescription"</li>
+                    <li>NHS Login flow &amp; session management</li>
+                </ul>
+            </td>
+        </tr>
+        <tr>
+            <td><strong>Phase 4</strong><br>Polish</td>
+            <td colspan="3">
+                <ul class="task-list">
+                    <li>First-launch voice tutorial &amp; onboarding</li>
+                    <li>Settings: speech rate, voice type, contrast, text size</li>
+                    <li>Error handling, offline mode, performance &amp; battery optimisation</li>
+                </ul>
+            </td>
+        </tr>
+        <tr>
+            <td><strong>Phase 5</strong><br>Launch</td>
+            <td colspan="3">
+                <ul class="task-list">
+                    <li>Automated end-to-end tests</li>
+                    <li>User testing with visually impaired users</li>
+                    <li>App Store &amp; Google Play submission</li>
+                    <li>Documentation &amp; analytics setup</li>
+                </ul>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<!-- Post-launch -->
+<h2>Post-Launch Enhancements (Optional)</h2>
+
+<table>
+    <thead>
+        <tr>
+            <th>Feature</th>
+            <th>Days</th>
+            <th>Weeks</th>
+            <th>Cost</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>NHS native API integration (replace WebView)</td>
+            <td>7</td>
+            <td>3.5</td>
+            <td>£3,500</td>
+        </tr>
+        <tr>
+            <td>GP Connect — Messages</td>
+            <td>7</td>
+            <td>3.5</td>
+            <td>£3,500</td>
+        </tr>
+        <tr>
+            <td>EPS — Prescriptions</td>
+            <td>7</td>
+            <td>3.5</td>
+            <td>£3,500</td>
+        </tr>
+        <tr>
+            <td>Advanced conversational voice interface</td>
+            <td>5</td>
+            <td>2.5</td>
+            <td>£2,500</td>
+        </tr>
+        <tr>
+            <td>Multi-city UK expansion</td>
+            <td>7</td>
+            <td>3.5</td>
+            <td>£3,500</td>
+        </tr>
+        <tr class="total-row">
+            <td>Post-launch Total</td>
+            <td>33</td>
+            <td>17</td>
+            <td>£16,500</td>
+        </tr>
+    </tbody>
+</table>
+
+<!-- Running costs -->
+<h2>Estimated Monthly Running Costs</h2>
+
+<table class="running-costs">
+    <thead>
+        <tr>
+            <th>Service</th>
+            <th>Monthly Cost</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>OpenAI API (intent parsing, ~1,000 users)</td>
+            <td>£30–50</td>
+        </tr>
+        <tr>
+            <td>Backend hosting (Railway / Render)</td>
+            <td>£5–15</td>
+        </tr>
+        <tr>
+            <td>Apple Developer Program</td>
+            <td>£8/mo (£99/yr)</td>
+        </tr>
+        <tr>
+            <td>Google Play Developer (one-time £21)</td>
+            <td>—</td>
+        </tr>
+        <tr>
+            <td>TfL API</td>
+            <td>Free</td>
+        </tr>
+        <tr>
+            <td>NHS Login / WebView</td>
+            <td>Free</td>
+        </tr>
+        <tr class="total-row">
+            <td><strong>Total monthly</strong></td>
+            <td><strong>~£50–75</strong></td>
+        </tr>
+    </tbody>
+</table>
+
+<!-- Assumptions -->
+<div class="assumptions">
+    <h3>Assumptions &amp; Notes</h3>
+    <ul>
+        <li>Day rate: £500/day</li>
+        <li>Working schedule: 2 days per week</li>
+        <li>Start date: February 2026 · Target MVP launch: August 2026</li>
+        <li>Platform: React Native + Expo (iOS &amp; Android from single codebase)</li>
+        <li>NHS integration via WebView MVP — no API onboarding dependency</li>
+        <li>Navigation: TfL Journey Planner API (free, London-only for MVP)</li>
+        <li>Running costs scale with user count; estimates based on ~1,000 monthly active users</li>
+        <li>Post-launch NHS API work is contingent on NHS England onboarding approval</li>
+    </ul>
+</div>
+
+<div class="footer">
+    <span>Vision Ability — Confidential</span>
+    <span>Page 1 of 1</span>
+</div>
+
+</body>
+</html>
