@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vision Ability — Interactive Prototype (Option 1: WebView NHS)</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #111;
+            color: #e0e0e0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        h1 { font-size: 28px; color: #fff; margin-bottom: 4px; }
+        .subtitle { color: #888; font-size: 13px; margin-bottom: 10px; }
+
+        .flow-nav {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 20px;
+            max-width: 900px;
+        }
+        .flow-btn {
+            padding: 8px 14px;
+            border-radius: 20px;
+            border: 1px solid #333;
+            background: #1a1a2e;
+            color: #aaa;
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .flow-btn:hover { border-color: #FFD700; color: #FFD700; }
+        .flow-btn.active { background: #FFD700; color: #000; border-color: #FFD700; font-weight: 700; }
+
+        .flow-section {
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        .description-panel {
+            flex: 1;
+            max-width: 420px;
+            background: #1a1a2e;
+            border: 1px solid #2d333b;
+            border-radius: 16px;
+            padding: 24px;
+            position: sticky;
+            top: 20px;
+        }
+        .desc-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #FFD700;
+            margin-bottom: 12px;
+        }
+        .desc-step {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+            align-items: flex-start;
+        }
+        .desc-num {
+            width: 28px; height: 28px;
+            background: #FFD700;
+            color: #000;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 800; font-size: 13px;
+            flex-shrink: 0;
+        }
+        .desc-text { font-size: 13px; color: #ccc; line-height: 1.5; }
+        .desc-text strong { color: #fff; }
+        .desc-text code {
+            background: #0d1117;
+            padding: 1px 5px;
+            border-radius: 4px;
+            font-size: 11px;
+            color: #4CAF50;
+        }
+        .desc-divider {
+            height: 1px;
+            background: #2d333b;
+            margin: 16px 0;
+        }
+        .desc-note {
+            font-size: 12px;
+            color: #888;
+            line-height: 1.5;
+            padding: 10px 12px;
+            background: #0d1117;
+            border-radius: 10px;
+            border-left: 3px solid #FFD700;
+        }
+        .desc-tech {
+            font-size: 12px;
+            color: #888;
+            line-height: 1.6;
+            margin-top: 12px;
+        }
+        .desc-tech strong { color: #aaa; }
+        .tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 600;
+            margin-right: 4px;
+        }
+        .tag-native { background: #1a3a1a; color: #4CAF50; }
+        .tag-webview { background: #1a1a3a; color: #5b9aff; }
+        .tag-ai { background: #3a1a3a; color: #c084fc; }
+        .tag-voice { background: #3a2a1a; color: #FFD700; }
+
+        /* ===== PHONE ===== */
+        .phone-container { flex-shrink: 0; }
+        .phone {
+            width: 340px; height: 700px;
+            background: #0d1117;
+            border-radius: 44px;
+            border: 3px solid #333;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+        }
+        .notch {
+            width: 110px; height: 26px;
+            background: #0d1117;
+            border-radius: 0 0 18px 18px;
+            position: absolute; top: 0; left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+        }
+        .status-bar {
+            height: 48px;
+            background: #0d1117;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 26px;
+            font-size: 13px; font-weight: 600; color: #fff;
+        }
+        .screen-content {
+            height: calc(100% - 48px - 74px);
+            overflow: hidden;
+            position: relative;
+        }
+        .tab-bar {
+            height: 74px;
+            background: #161b22;
+            border-top: 1px solid #2d333b;
+            display: flex; justify-content: space-around; align-items: center;
+            padding-bottom: 10px;
+        }
+        .tab-item {
+            display: flex; flex-direction: column; align-items: center;
+            gap: 3px; font-size: 10px; color: #555; cursor: pointer;
+            transition: color 0.2s;
+        }
+        .tab-item:hover { color: #aaa; }
+        .tab-item.active { color: #FFD700; }
+        .tab-icon { font-size: 24px; }
+
+        /* ===== ALL SCREENS (hidden by default) ===== */
+        .screen { display: none; height: 100%; }
+        .screen.active { display: flex; flex-direction: column; }
+
+        /* ===== HOME ===== */
+        .home-screen {
+            background: linear-gradient(180deg, #0d1117, #161b22);
+            align-items: center; padding: 20px;
+        }
+        .app-logo { font-size: 32px; font-weight: 800; color: #FFD700; letter-spacing: 2px; margin-top: 8px; white-space: nowrap; }
+        .app-tagline { color: #666; font-size: 13px; margin-top: 2px; margin-bottom: 28px; }
+        .big-btn {
+            width: 100%; padding: 26px 20px;
+            border-radius: 20px; border: 3px solid;
+            display: flex; align-items: center; gap: 16px;
+            margin-bottom: 14px; cursor: pointer;
+            transition: transform 0.15s, box-shadow 0.15s;
+        }
+        .big-btn:hover { transform: scale(1.02); }
+        .nav-btn { background: linear-gradient(135deg,#1a3a1a,#0d2a0d); border-color: #4CAF50; }
+        .nhs-btn { background: linear-gradient(135deg,#1a1a3a,#0d0d2a); border-color: #005EB8; }
+        .btn-icon { font-size: 38px; flex-shrink: 0; }
+        .btn-text h3 { font-size: 20px; font-weight: 700; color: #fff; margin-bottom: 3px; }
+        .btn-text p { font-size: 12px; color: #999; }
+        .voice-hint-box {
+            margin-top: auto; width: 100%;
+            background: #1c2128; border: 1px solid #2d333b;
+            border-radius: 16px; padding: 16px; text-align: center;
+        }
+        .voice-hint-box p { font-size: 12px; color: #777; line-height: 1.5; }
+
+        /* ===== NAVIGATION LISTENING ===== */
+        .nav-listen {
+            background: linear-gradient(180deg,#0d1117,#0a1628);
+            align-items: center; padding: 18px;
+        }
+        .nav-title { font-size: 24px; font-weight: 700; color: #fff; margin-bottom: 20px; }
+        .mic-circle {
+            width: 150px; height: 150px; border-radius: 50%;
+            background: radial-gradient(circle,#4CAF50,#1a3a1a 70%);
+            border: 4px solid #4CAF50;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 54px; margin-bottom: 10px;
+            animation: pulse 2s ease-in-out infinite;
+            box-shadow: 0 0 50px rgba(76,175,80,0.3);
+        }
+        @keyframes pulse {
+            0%,100% { transform:scale(1); box-shadow:0 0 40px rgba(76,175,80,0.3); }
+            50% { transform:scale(1.06); box-shadow:0 0 60px rgba(76,175,80,0.5); }
+        }
+        .listen-label { color: #4CAF50; font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+        .spoken { color: #ccc; font-size: 13px; font-style: italic; margin-bottom: 18px; text-align: center; }
+        .from-to {
+            width: 100%; background: #161b22;
+            border: 1px solid #2d333b; border-radius: 14px; padding: 14px;
+        }
+        .loc-row { display: flex; align-items: center; gap: 10px; padding: 7px 0; }
+        .loc-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+        .dot-g { background: #4CAF50; }
+        .dot-r { background: #f44336; }
+        .loc-label { font-size: 10px; color: #555; }
+        .loc-val { font-size: 14px; color: #fff; font-weight: 500; }
+        .loc-div { height: 1px; background: #2d333b; margin: 0 0 0 22px; }
+        .transport-row { display: flex; gap: 8px; margin-top: 14px; width: 100%; }
+        .t-chip {
+            flex: 1; padding: 10px; background: #1c2128;
+            border: 2px solid #2d333b; border-radius: 12px;
+            text-align: center; font-size: 11px; color: #777; cursor: pointer;
+        }
+        .t-chip.active { border-color: #FFD700; color: #FFD700; background: #2a2a1a; }
+        .t-chip-icon { font-size: 20px; display: block; margin-bottom: 3px; }
+
+        /* ===== JOURNEY ===== */
+        .journey-screen {
+            background: linear-gradient(180deg,#0d1117,#0a1628);
+            padding: 14px; overflow-y: auto;
+        }
+        .j-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+        .j-title { font-size: 18px; font-weight: 700; color: #fff; }
+        .j-time { font-size: 26px; font-weight: 800; color: #FFD700; }
+        .j-time small { font-size: 12px; font-weight: 400; color: #888; }
+        .step-card {
+            background: #161b22; border: 1px solid #2d333b;
+            border-radius: 14px; padding: 14px; margin-bottom: 10px;
+            display: flex; gap: 12px;
+        }
+        .step-card.active-step { border-color: #FFD700; border-width: 2px; background: #1c1f26; }
+        .s-num {
+            width: 32px; height: 32px; border-radius: 50%;
+            background: #333; color: #999;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 800; font-size: 14px; flex-shrink: 0;
+        }
+        .step-card.active-step .s-num { background: #FFD700; color: #000; }
+        .s-body h4 { font-size: 14px; font-weight: 600; color: #fff; margin-bottom: 3px; }
+        .s-body p { font-size: 12px; color: #aaa; line-height: 1.4; }
+        .s-badge {
+            display: inline-block; padding: 2px 8px;
+            border-radius: 6px; font-size: 10px; font-weight: 700; margin-top: 6px;
+        }
+        .b-walk { background:#1a3a1a; color:#4CAF50; }
+        .b-tube { background:#1a1a3a; color:#005EB8; }
+        .speaking-bar {
+            background: #1c2128; border-top: 1px solid #2d333b;
+            padding: 10px 14px; display: flex; align-items: center; gap: 10px;
+            border-radius: 12px; margin-top: auto;
+        }
+        .waves { display: flex; gap: 3px; align-items: center; }
+        .wave {
+            width: 3px; background: #4CAF50; border-radius: 2px;
+            animation: wv 0.8s ease-in-out infinite;
+        }
+        .wave:nth-child(1){height:8px;animation-delay:0s}
+        .wave:nth-child(2){height:16px;animation-delay:.1s}
+        .wave:nth-child(3){height:12px;animation-delay:.2s}
+        .wave:nth-child(4){height:20px;animation-delay:.3s}
+        .wave:nth-child(5){height:10px;animation-delay:.4s}
+        .wave:nth-child(6){height:14px;animation-delay:.15s}
+        @keyframes wv { 0%,100%{transform:scaleY(1)} 50%{transform:scaleY(.35)} }
+        .speak-txt { font-size: 11px; color: #4CAF50; flex: 1; }
+
+        /* ===== NHS LOGIN ===== */
+        .nhs-login-screen {
+            background: #fff; align-items: center; padding: 0;
+            color: #212b32;
+        }
+        .nhs-wv-bar {
+            width: 100%; background: #005EB8; padding: 10px 14px;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .nhs-wv-bar .back { color: #fff; font-size: 18px; cursor: pointer; }
+        .nhs-wv-bar .url {
+            flex: 1; background: rgba(255,255,255,0.15);
+            padding: 5px 10px; border-radius: 8px;
+            font-size: 11px; color: rgba(255,255,255,0.8);
+            display: flex; align-items: center; gap: 4px;
+        }
+        .nhs-wv-bar .lock { font-size: 10px; }
+        .nhs-login-body {
+            flex: 1; padding: 30px 24px; display: flex;
+            flex-direction: column; align-items: center;
+        }
+        .nhs-logo-big {
+            background: #005EB8; color: #fff;
+            font-weight: 800; padding: 8px 20px;
+            border-radius: 6px; font-size: 22px;
+            letter-spacing: 1px; margin-bottom: 20px;
+        }
+        .nhs-login-body h2 { font-size: 22px; font-weight: 700; color: #212b32; margin-bottom: 16px; }
+        .nhs-field {
+            width: 100%; margin-bottom: 14px;
+        }
+        .nhs-field label {
+            display: block; font-size: 14px; font-weight: 600;
+            color: #212b32; margin-bottom: 4px;
+        }
+        .nhs-field input {
+            width: 100%; padding: 12px; border: 2px solid #aeb7bd;
+            border-radius: 6px; font-size: 16px; color: #212b32;
+        }
+        .nhs-submit {
+            width: 100%; padding: 14px; background: #007f3b;
+            color: #fff; border: none; border-radius: 6px;
+            font-size: 16px; font-weight: 700; cursor: pointer;
+            margin-top: 8px;
+        }
+        .nhs-link { color: #005EB8; font-size: 14px; margin-top: 14px; text-decoration: underline; }
+        .voice-float {
+            position: absolute; bottom: 12px; left: 14px; right: 14px;
+            background: rgba(0,94,184,0.95); border-radius: 14px;
+            padding: 10px 14px; display: flex; align-items: center; gap: 10px;
+            backdrop-filter: blur(10px);
+        }
+        .voice-float span { color: #fff; font-size: 12px; }
+        .voice-float .vf-icon { font-size: 20px; }
+
+        /* ===== NHS WEBVIEW MESSAGES ===== */
+        .nhs-wv-screen {
+            background: #fff; color: #212b32; padding: 0;
+        }
+        .nhs-wv-content {
+            flex: 1; padding: 16px; overflow-y: auto;
+        }
+        .nhs-wv-content h2 {
+            font-size: 22px; font-weight: 700; color: #212b32;
+            margin-bottom: 4px;
+        }
+        .nhs-breadcrumb { font-size: 12px; color: #768692; margin-bottom: 16px; }
+        .nhs-msg-card {
+            border: 1px solid #d8dde0; border-radius: 8px;
+            padding: 14px; margin-bottom: 10px; background: #fff;
+        }
+        .nhs-msg-card.unread { border-left: 4px solid #005EB8; background: #f0f4f5; }
+        .nhs-msg-from { font-size: 15px; font-weight: 700; color: #212b32; }
+        .nhs-msg-date { font-size: 12px; color: #768692; margin-bottom: 4px; }
+        .nhs-msg-preview { font-size: 13px; color: #4c6272; line-height: 1.4; }
+
+        /* voice overlay on webview */
+        .voice-overlay {
+            position: absolute; bottom: 0; left: 0; right: 0;
+            background: linear-gradient(transparent, rgba(0,0,0,0.85) 30%);
+            padding: 40px 14px 14px;
+        }
+        .vo-bar {
+            background: rgba(0,94,184,0.95);
+            border-radius: 16px; padding: 12px 16px;
+            display: flex; align-items: center; gap: 10px;
+            backdrop-filter: blur(10px);
+        }
+        .vo-bar .vo-icon { font-size: 22px; }
+        .vo-bar .vo-text { color: #fff; font-size: 12px; flex: 1; line-height: 1.4; }
+        .vo-actions {
+            display: flex; gap: 6px; margin-top: 8px;
+        }
+        .vo-action {
+            padding: 8px 12px; border-radius: 10px;
+            background: rgba(255,255,255,0.15);
+            color: #fff; font-size: 11px; font-weight: 600;
+            border: 1px solid rgba(255,255,255,0.2);
+            flex: 1; text-align: center;
+        }
+        .vo-action:first-child { background: rgba(76,175,80,0.3); border-color: #4CAF50; }
+
+        /* ===== NHS READING MESSAGE ===== */
+        .nhs-reading-screen {
+            background: #fff; color: #212b32; padding: 0;
+        }
+        .nhs-reading-content {
+            flex: 1; padding: 16px; overflow-y: auto;
+        }
+        .nhs-reading-content h2 { font-size: 20px; font-weight: 700; color: #212b32; margin-bottom: 6px; }
+        .nhs-reading-meta { font-size: 12px; color: #768692; margin-bottom: 14px; }
+        .nhs-reading-body { font-size: 14px; color: #212b32; line-height: 1.7; }
+        .nhs-reading-body p { margin-bottom: 12px; }
+        .highlight-line {
+            background: #fff9c4; padding: 2px 4px; border-radius: 3px;
+        }
+
+        /* Reading overlay */
+        .reading-overlay {
+            position: absolute; bottom: 0; left: 0; right: 0;
+            background: linear-gradient(transparent, rgba(0,0,0,0.9) 30%);
+            padding: 50px 14px 14px;
+        }
+        .ro-progress {
+            height: 3px; background: #2d333b; border-radius: 2px; margin-bottom: 10px;
+        }
+        .ro-fill { height: 100%; background: #005EB8; border-radius: 2px; width: 40%; }
+        .ro-bar {
+            background: rgba(0,94,184,0.95);
+            border-radius: 16px; padding: 12px 16px;
+            backdrop-filter: blur(10px);
+        }
+        .ro-status {
+            display: flex; align-items: center; gap: 10px;
+            margin-bottom: 8px;
+        }
+        .ro-status .ro-icon { font-size: 20px; }
+        .ro-status .ro-text { color: #fff; font-size: 12px; flex: 1; }
+        .ro-controls {
+            display: flex; gap: 6px;
+        }
+        .ro-ctrl {
+            padding: 8px 0; border-radius: 10px;
+            background: rgba(255,255,255,0.12);
+            color: #fff; font-size: 11px; font-weight: 600;
+            border: 1px solid rgba(255,255,255,0.15);
+            flex: 1; text-align: center;
+        }
+
+        /* ===== NHS PRESCRIPTIONS ===== */
+        .nhs-rx-screen {
+            background: #fff; color: #212b32; padding: 0;
+        }
+        .nhs-rx-content {
+            flex: 1; padding: 16px; overflow-y: auto;
+        }
+        .nhs-rx-content h2 { font-size: 20px; font-weight: 700; margin-bottom: 14px; }
+        .rx-card {
+            border: 1px solid #d8dde0; border-radius: 8px;
+            padding: 14px; margin-bottom: 10px; background: #fff;
+        }
+        .rx-name { font-size: 15px; font-weight: 700; color: #212b32; }
+        .rx-dose { font-size: 13px; color: #4c6272; margin-bottom: 6px; }
+        .rx-status {
+            display: inline-block; padding: 3px 10px;
+            border-radius: 4px; font-size: 11px; font-weight: 700;
+        }
+        .rx-available { background: #e7f5e6; color: #007f3b; }
+        .rx-requested { background: #fef7e0; color: #b58500; }
+
+        .rx-overlay {
+            position: absolute; bottom: 0; left: 0; right: 0;
+            background: linear-gradient(transparent, rgba(0,0,0,0.9) 30%);
+            padding: 50px 14px 14px;
+        }
+        .rx-confirm {
+            background: rgba(0,127,59,0.95);
+            border-radius: 16px; padding: 14px 16px;
+            color: #fff;
+        }
+        .rx-confirm-title { font-size: 14px; font-weight: 700; margin-bottom: 10px; }
+        .rx-confirm-detail { font-size: 12px; line-height: 1.5; margin-bottom: 12px; opacity: 0.9; }
+        .rx-confirm-btns { display: flex; gap: 8px; }
+        .rx-yes {
+            flex: 1; padding: 10px; border-radius: 10px;
+            background: #fff; color: #007f3b;
+            font-weight: 700; font-size: 13px; text-align: center;
+        }
+        .rx-no {
+            flex: 1; padding: 10px; border-radius: 10px;
+            background: rgba(255,255,255,0.15); color: #fff;
+            font-weight: 600; font-size: 13px; text-align: center;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        /* ===== ARCHITECTURE DIAGRAM ===== */
+        .arch-info {
+            max-width: 1200px; width: 100%;
+            margin-top: 40px;
+            background: #1a1a2e;
+            border: 1px solid #2d333b;
+            border-radius: 16px;
+            padding: 30px;
+        }
+        .arch-title { font-size: 22px; font-weight: 700; color: #FFD700; margin-bottom: 20px; }
+        .arch-diagram {
+            display: flex; gap: 12px; align-items: stretch; flex-wrap: wrap;
+            justify-content: center;
+        }
+        .arch-box {
+            background: #0d1117; border: 2px solid #2d333b;
+            border-radius: 14px; padding: 16px;
+            flex: 1; min-width: 200px; max-width: 250px;
+        }
+        .arch-box h4 { font-size: 13px; font-weight: 700; margin-bottom: 8px; }
+        .arch-box ul { list-style: none; }
+        .arch-box li {
+            font-size: 11px; color: #aaa; padding: 3px 0;
+            border-bottom: 1px solid #1c2128;
+        }
+        .arch-box li:last-child { border: none; }
+        .arch-arrow {
+            display: flex; align-items: center;
+            font-size: 24px; color: #FFD700;
+        }
+        .ab-green { border-color: #4CAF50; }
+        .ab-green h4 { color: #4CAF50; }
+        .ab-blue { border-color: #005EB8; }
+        .ab-blue h4 { color: #005EB8; }
+        .ab-purple { border-color: #8b5cf6; }
+        .ab-purple h4 { color: #8b5cf6; }
+        .ab-yellow { border-color: #FFD700; }
+        .ab-yellow h4 { color: #FFD700; }
+    </style>
+</head>
+<body>
+
+<h1>Vision Ability — Interactive Prototype</h1>
+<p class="subtitle">Option 1: Native Navigation + NHS via Enhanced WebView &bull; Tap screens below to explore each flow</p>
+
+<div class="flow-nav" id="flowNav">
+    <button class="flow-btn active" data-screen="home">🏠 Home</button>
+    <button class="flow-btn" data-screen="nav-listen">🎤 Voice Input</button>
+    <button class="flow-btn" data-screen="journey">🗺️ Journey Steps</button>
+    <button class="flow-btn" data-screen="nhs-login">🔐 NHS Login</button>
+    <button class="flow-btn" data-screen="nhs-messages">💬 NHS Messages</button>
+    <button class="flow-btn" data-screen="nhs-reading">📖 Reading Message</button>
+    <button class="flow-btn" data-screen="nhs-rx">💊 Prescriptions</button>
+</div>
+
+<div class="flow-section">
+    <!-- ===== DESCRIPTION PANEL ===== -->
+    <div class="description-panel" id="descPanel">
+        <!-- Content injected by JS -->
+    </div>
+
+    <!-- ===== PHONE ===== -->
+    <div class="phone-container">
+        <div class="phone">
+            <div class="notch"></div>
+            <div class="status-bar">
+                <span>9:41</span>
+                <span>📶 🔋</span>
+            </div>
+            <div class="screen-content">
+
+                <!-- HOME -->
+                <div class="screen active home-screen" id="screen-home">
+                    <div class="app-logo">Vision Ability</div>
+                    <div class="app-tagline">Your voice, your world</div>
+                    <div class="big-btn nav-btn" data-goto="nav-listen">
+                        <span class="btn-icon">🧭</span>
+                        <div class="btn-text"><h3>Navigate</h3><p>Get voice directions in London</p></div>
+                    </div>
+                    <div class="big-btn nhs-btn" data-goto="nhs-login">
+                        <span class="btn-icon">🏥</span>
+                        <div class="btn-text"><h3>NHS Portal</h3><p>Messages, prescriptions & records</p></div>
+                    </div>
+                    <div class="voice-hint-box">
+                        <p>🎤 Say <strong>"Navigate"</strong> or <strong>"NHS"</strong><br>Say <strong>"Help"</strong> for all commands</p>
+                    </div>
+                </div>
+
+                <!-- NAV LISTENING -->
+                <div class="screen nav-listen" id="screen-nav-listen">
+                    <div class="nav-title">Where to?</div>
+                    <div class="mic-circle">🎤</div>
+                    <div class="listen-label">Listening...</div>
+                    <div class="spoken">"King's Cross Station"</div>
+                    <div class="from-to">
+                        <div class="loc-row">
+                            <span class="loc-dot dot-g"></span>
+                            <div><div class="loc-label">FROM</div><div class="loc-val">📍 Current Location</div></div>
+                        </div>
+                        <div class="loc-div"></div>
+                        <div class="loc-row">
+                            <span class="loc-dot dot-r"></span>
+                            <div><div class="loc-label">TO</div><div class="loc-val">King's Cross Station</div></div>
+                        </div>
+                    </div>
+                    <div class="transport-row">
+                        <div class="t-chip active"><span class="t-chip-icon">🚇</span>Tube</div>
+                        <div class="t-chip"><span class="t-chip-icon">🚌</span>Bus</div>
+                        <div class="t-chip"><span class="t-chip-icon">🚶</span>Walk</div>
+                    </div>
+                </div>
+
+                <!-- JOURNEY -->
+                <div class="screen journey-screen" id="screen-journey">
+                    <div class="j-header">
+                        <div class="j-title">Your Journey</div>
+                        <div class="j-time">23 <small>min</small></div>
+                    </div>
+                    <div class="step-card active-step">
+                        <div class="s-num">1</div>
+                        <div class="s-body">
+                            <h4>Walk to Baker Street Station</h4>
+                            <p>Head south on Baker Street for 200 metres. The entrance is on your left.</p>
+                            <span class="s-badge b-walk">🚶 3 min</span>
+                        </div>
+                    </div>
+                    <div class="step-card">
+                        <div class="s-num">2</div>
+                        <div class="s-body">
+                            <h4>Take the Metropolitan Line</h4>
+                            <p>Board eastbound towards Aldgate. Travel 3 stops.</p>
+                            <span class="s-badge b-tube">🚇 12 min · Metropolitan</span>
+                        </div>
+                    </div>
+                    <div class="step-card">
+                        <div class="s-num">3</div>
+                        <div class="s-body">
+                            <h4>Exit at King's Cross St Pancras</h4>
+                            <p>Follow signs to the main exit. Step-free access via lift.</p>
+                            <span class="s-badge b-walk">🚶 5 min</span>
+                        </div>
+                    </div>
+                    <div class="speaking-bar">
+                        <span>🔊</span>
+                        <div class="waves"><div class="wave"></div><div class="wave"></div><div class="wave"></div><div class="wave"></div><div class="wave"></div><div class="wave"></div></div>
+                        <span class="speak-txt">Reading step 1 of 3... Say "next" or "repeat"</span>
+                    </div>
+                </div>
+
+                <!-- NHS LOGIN (WebView) -->
+                <div class="screen nhs-login-screen" id="screen-nhs-login">
+                    <div class="nhs-wv-bar">
+                        <span class="back" data-goto="home">←</span>
+                        <div class="url"><span class="lock">🔒</span> auth.login.nhs.uk</div>
+                    </div>
+                    <div class="nhs-login-body">
+                        <div class="nhs-logo-big">NHS</div>
+                        <h2>Log in</h2>
+                        <div class="nhs-field">
+                            <label>Email or mobile</label>
+                            <input type="text" value="pawel@example.com" readonly>
+                        </div>
+                        <div class="nhs-field">
+                            <label>Password</label>
+                            <input type="password" value="••••••••••" readonly>
+                        </div>
+                        <button class="nhs-submit" data-goto="nhs-messages">Continue</button>
+                        <a class="nhs-link">Forgotten password?</a>
+                    </div>
+                    <div class="voice-float">
+                        <span class="vf-icon">🔊</span>
+                        <span>NHS Login page loaded. Email field is pre-filled. Say <strong>"Continue"</strong> to log in or <strong>"Help"</strong> for options.</span>
+                    </div>
+                </div>
+
+                <!-- NHS MESSAGES (WebView with voice overlay) -->
+                <div class="screen nhs-wv-screen" id="screen-nhs-messages">
+                    <div class="nhs-wv-bar">
+                        <span class="back" data-goto="home">←</span>
+                        <div class="url"><span class="lock">🔒</span> nhsapp.service.nhs.uk/messages</div>
+                    </div>
+                    <div class="nhs-wv-content">
+                        <div class="nhs-breadcrumb">NHS App › Messages</div>
+                        <h2>Messages</h2>
+                        <div class="nhs-msg-card unread">
+                            <div class="nhs-msg-from">Dr. Sarah Williams</div>
+                            <div class="nhs-msg-date">Today, 10:30 AM</div>
+                            <div class="nhs-msg-preview">Your blood test results are now available. Everything looks normal but I'd like to discuss your...</div>
+                        </div>
+                        <div class="nhs-msg-card unread">
+                            <div class="nhs-msg-from">Camden GP Surgery</div>
+                            <div class="nhs-msg-date">Yesterday, 2:15 PM</div>
+                            <div class="nhs-msg-preview">Reminder: Your annual flu vaccination is now available. Please book an appointment...</div>
+                        </div>
+                        <div class="nhs-msg-card">
+                            <div class="nhs-msg-from">Dr. James Chen</div>
+                            <div class="nhs-msg-date">3 Feb 2026</div>
+                            <div class="nhs-msg-preview">Following your appointment, I've updated your prescription for Metformin...</div>
+                        </div>
+                    </div>
+                    <div class="voice-overlay">
+                        <div class="vo-bar">
+                            <span class="vo-icon">🔊</span>
+                            <div class="vo-text">You have <strong>2 unread messages</strong>. First from Dr. Sarah Williams about blood test results. Say <strong>"read it"</strong> to hear the full message.</div>
+                        </div>
+                        <div class="vo-actions">
+                            <div class="vo-action">🎤 "Read it"</div>
+                            <div class="vo-action">⏭️ "Next"</div>
+                            <div class="vo-action">↩️ "Go back"</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- NHS READING A MESSAGE -->
+                <div class="screen nhs-reading-screen" id="screen-nhs-reading">
+                    <div class="nhs-wv-bar">
+                        <span class="back" data-goto="nhs-messages">←</span>
+                        <div class="url"><span class="lock">🔒</span> nhsapp.service.nhs.uk/messages/1</div>
+                    </div>
+                    <div class="nhs-reading-content">
+                        <h2>Blood test results</h2>
+                        <div class="nhs-reading-meta">From: Dr. Sarah Williams &bull; Today at 10:30 AM</div>
+                        <div class="nhs-reading-body">
+                            <p>Dear Pawel,</p>
+                            <p><span class="highlight-line">Your recent blood test results are now available and I'm pleased to say everything looks normal.</span></p>
+                            <p>Your cholesterol level is 4.2 mmol/L which is within the healthy range. Your HbA1c is 38 mmol/mol which is also good.</p>
+                            <p>However, I noticed your Vitamin D levels are slightly below the recommended range at 42 nmol/L. I'd recommend starting a Vitamin D supplement.</p>
+                            <p>If you'd like to discuss these results, please book an appointment or reply to this message.</p>
+                            <p>Best regards,<br>Dr. Sarah Williams</p>
+                        </div>
+                    </div>
+                    <div class="reading-overlay">
+                        <div class="ro-progress"><div class="ro-fill"></div></div>
+                        <div class="ro-bar">
+                            <div class="ro-status">
+                                <span class="ro-icon">🔊</span>
+                                <span class="ro-text">Reading message... <strong>"Your recent blood test results are now available..."</strong></span>
+                            </div>
+                            <div class="ro-controls">
+                                <div class="ro-ctrl">⏸️ Pause</div>
+                                <div class="ro-ctrl">🔄 Repeat</div>
+                                <div class="ro-ctrl">⏩ Summary</div>
+                                <div class="ro-ctrl">↩️ Reply</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- NHS PRESCRIPTIONS (WebView) -->
+                <div class="screen nhs-rx-screen" id="screen-nhs-rx">
+                    <div class="nhs-wv-bar">
+                        <span class="back" data-goto="nhs-messages">←</span>
+                        <div class="url"><span class="lock">🔒</span> nhsapp.service.nhs.uk/prescriptions</div>
+                    </div>
+                    <div class="nhs-rx-content">
+                        <div class="nhs-breadcrumb">NHS App › Prescriptions</div>
+                        <h2>Your prescriptions</h2>
+                        <div class="rx-card">
+                            <div class="rx-name">Metformin 500mg</div>
+                            <div class="rx-dose">Twice daily with meals</div>
+                            <span class="rx-status rx-available">Available to request</span>
+                        </div>
+                        <div class="rx-card">
+                            <div class="rx-name">Atorvastatin 20mg</div>
+                            <div class="rx-dose">Once daily at night</div>
+                            <span class="rx-status rx-available">Available to request</span>
+                        </div>
+                        <div class="rx-card">
+                            <div class="rx-name">Ramipril 5mg</div>
+                            <div class="rx-dose">Once daily in the morning</div>
+                            <span class="rx-status rx-requested">Requested 5 Feb</span>
+                        </div>
+                    </div>
+                    <div class="rx-overlay">
+                        <div class="rx-confirm">
+                            <div class="rx-confirm-title">🎤 Voice Prescription Request</div>
+                            <div class="rx-confirm-detail">
+                                You said: <strong>"Request Metformin"</strong><br><br>
+                                I'll request a repeat prescription for <strong>Metformin 500mg</strong> (twice daily) from your GP. This usually takes 2-3 working days.
+                            </div>
+                            <div class="rx-confirm-btns">
+                                <div class="rx-yes">✓ Say "Yes" to confirm</div>
+                                <div class="rx-no">✗ Say "Cancel"</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="tab-bar" id="tabBar">
+                <div class="tab-item active" data-tab="home"><span class="tab-icon">🏠</span>Home</div>
+                <div class="tab-item" data-tab="nav-listen"><span class="tab-icon">🧭</span>Navigate</div>
+                <div class="tab-item" data-tab="nhs-login"><span class="tab-icon">🏥</span>NHS</div>
+                <div class="tab-item" data-tab="settings"><span class="tab-icon">⚙️</span>Settings</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== ARCHITECTURE ===== -->
+<div class="arch-info">
+    <div class="arch-title">How it works — Architecture (Option 1: WebView)</div>
+    <div class="arch-diagram">
+        <div class="arch-box ab-green">
+            <h4>📱 React Native App</h4>
+            <ul>
+                <li>expo-speech-recognition (on-device STT)</li>
+                <li>expo-speech (on-device TTS)</li>
+                <li>expo-location (GPS)</li>
+                <li>React Native WebView</li>
+                <li>VoiceContext provider</li>
+                <li>Accessibility layer</li>
+            </ul>
+        </div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-box ab-yellow">
+            <h4>⚡ Your Backend (Node.js)</h4>
+            <ul>
+                <li>Proxies OpenAI calls (key security)</li>
+                <li>Proxies TfL API calls</li>
+                <li>Caches common journeys</li>
+                <li>Rate limiting</li>
+            </ul>
+        </div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-box ab-purple">
+            <h4>🧠 External APIs</h4>
+            <ul>
+                <li>OpenAI GPT-4o-mini (NLU)</li>
+                <li>TfL Journey Planner (routes)</li>
+            </ul>
+        </div>
+    </div>
+    <div style="display:flex;gap:12px;margin-top:16px;justify-content:center;flex-wrap:wrap;">
+        <div class="arch-box ab-blue" style="max-width:350px;">
+            <h4>🌐 NHS (via WebView — no API needed)</h4>
+            <ul>
+                <li>User opens nhsapp.service.nhs.uk in WebView</li>
+                <li>Logs in with NHS Login (OAuth in WebView)</li>
+                <li>App injects JS to extract page text</li>
+                <li>GPT-4o-mini summarises content</li>
+                <li>expo-speech reads it aloud</li>
+                <li>Voice commands navigate between pages</li>
+                <li>No NHS API onboarding required!</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script>
+const descriptions = {
+    home: {
+        title: 'Home Screen — Voice-First Design',
+        steps: [
+            { text: '<strong>App launches</strong> and immediately announces: <em>"Welcome to Vision Ability. Say Navigate for directions, or NHS for your health portal."</em> Uses <code>expo-speech</code> TTS.' },
+            { text: '<strong>Two large buttons</strong> (minimum 80pt touch targets) — far exceeding Apple\'s 44pt minimum. High-contrast borders on dark background.' },
+            { text: '<strong>Voice is always listening</strong> (after initial permission). User says "Navigate" or "NHS" — <code>expo-speech-recognition</code> detects this on-device, no internet needed.' },
+            { text: '<strong>Screen reader compatible</strong> — every element has accessibilityLabel and accessibilityHint for VoiceOver/TalkBack.' }
+        ],
+        tags: ['native', 'voice'],
+        note: 'The entire app can be operated without seeing the screen. Every interaction has a voice alternative.',
+        tech: '<strong>Tech:</strong> React Native + Expo Router tabs. On-device STT/TTS (zero latency, zero cost). No API calls on this screen.'
+    },
+    'nav-listen': {
+        title: 'Voice Input — Destination',
+        steps: [
+            { text: '<strong>App speaks:</strong> <em>"Where would you like to go?"</em> and starts listening via <code>expo-speech-recognition</code> (on-device, free).' },
+            { text: '<strong>User speaks naturally:</strong> "King\'s Cross Station" or even "that big train station with the Harry Potter platform" — the transcript is sent to <strong>GPT-4o-mini</strong> which extracts a structured destination.' },
+            { text: '<strong>GPS auto-fills "from"</strong> using <code>expo-location</code>. User doesn\'t need to say where they are.' },
+            { text: '<strong>App confirms:</strong> <em>"From your current location to King\'s Cross Station. By tube, bus, or walking?"</em> User says their preference.' },
+            { text: '<strong>Submits to TfL API</strong> — free Journey Planner endpoint. Returns step-by-step journey in JSON.' }
+        ],
+        tags: ['native', 'voice', 'ai'],
+        note: 'The flow is conversational. If the destination is ambiguous, GPT asks a follow-up: "Did you mean King\'s Cross or King\'s College?" — natural dialogue, not rigid commands.',
+        tech: '<strong>API cost per query:</strong> ~£0.001 (GPT-4o-mini for intent parsing) + free (TfL API). On-device STT/TTS cost: £0.'
+    },
+    journey: {
+        title: 'Journey Steps — Voice Guidance',
+        steps: [
+            { text: '<strong>TfL JSON → Natural English:</strong> GPT-4o-mini converts the raw API response into clear, spoken instructions optimised for visually impaired users.' },
+            { text: '<strong>Auto-reads aloud:</strong> <em>"Step 1 of 3: Walk south on Baker Street for 200 metres. The station entrance will be on your left."</em>' },
+            { text: '<strong>Voice commands during journey:</strong><br>• "Next" → reads next step<br>• "Repeat" → re-reads current step<br>• "Where am I?" → re-checks GPS<br>• "How long?" → remaining time<br>• "Stop" → cancels navigation' },
+            { text: '<strong>Currently active step highlighted</strong> with yellow border and numbered badge. Large text (18px+) for partially sighted users.' },
+            { text: '<strong>Step-free access info</strong> included when available from TfL data (e.g., "Step-free access via lift").' }
+        ],
+        tags: ['native', 'voice', 'ai'],
+        note: 'GPT adds sensory cues not in the raw TfL data: "You\'ll hear the escalator on your right" or "Listen for the platform announcement." This is the AI value-add.',
+        tech: '<strong>Tech:</strong> TfL Journey Planner API (free) → GPT-4o-mini enrichment (~£0.002/journey) → expo-speech TTS (free). Total cost per journey: ~£0.003.'
+    },
+    'nhs-login': {
+        title: 'NHS Login — WebView Authentication',
+        steps: [
+            { text: '<strong>Opens the real NHS Login page</strong> inside a React Native WebView. URL bar shows the authentic <code>auth.login.nhs.uk</code> domain with 🔒.' },
+            { text: '<strong>Voice overlay floats at bottom:</strong> The app injects JavaScript to detect which page/field is active, then speaks: <em>"NHS Login page. Email field is ready. Say Continue to proceed."</em>' },
+            { text: '<strong>User authenticates normally</strong> — email, password, possibly face ID. This is the standard NHS Login OAuth2 flow. We don\'t need any API access for this.' },
+            { text: '<strong>After login, session persists</strong> in the WebView. NHS Login sets cookies/tokens that keep the user logged in for subsequent visits.' },
+            { text: '<strong>App detects successful login</strong> by monitoring URL changes. When redirected to nhsapp.service.nhs.uk, the voice overlay activates fully.' }
+        ],
+        tags: ['webview', 'voice'],
+        note: 'This is the key insight: NHS Login works inside a WebView with zero API integration. The user authenticates directly with NHS. We just wrap it with voice controls.',
+        tech: '<strong>Tech:</strong> React Native WebView + injected JavaScript for page detection. No backend needed. No NHS onboarding needed. Works today.'
+    },
+    'nhs-messages': {
+        title: 'NHS Messages — WebView + Voice Overlay',
+        steps: [
+            { text: '<strong>WebView loads nhsapp.service.nhs.uk/messages</strong> — the real NHS App website, already authenticated from the login step.' },
+            { text: '<strong>Injected JavaScript extracts page content:</strong> DOM querySelectorAll grabs message cards — sender, date, preview text. This runs client-side inside the WebView.' },
+            { text: '<strong>Extracted text → GPT-4o-mini:</strong> Summarises into a spoken overview: <em>"You have 2 unread messages. First from Dr. Sarah Williams about blood test results."</em>' },
+            { text: '<strong>Voice overlay shows available commands:</strong> "Read it", "Next message", "Go back". These trigger WebView navigation + content extraction + TTS.' },
+            { text: '<strong>User says "Read it"</strong> → app clicks the message link in the WebView via injected JS → extracts full message text → reads aloud.' }
+        ],
+        tags: ['webview', 'voice', 'ai'],
+        note: 'The WebView renders the real NHS website. Our voice overlay floats on top. The user never needs to see or touch the webpage — voice handles everything. For partially sighted users, the webpage is still visible underneath.',
+        tech: '<strong>How JS injection works:</strong><br><code>webViewRef.injectJavaScript(`<br>&nbsp;&nbsp;const msgs = document.querySelectorAll(\'.message-card\');<br>&nbsp;&nbsp;const data = Array.from(msgs).map(m => ({<br>&nbsp;&nbsp;&nbsp;&nbsp;from: m.querySelector(\'.from\').textContent,<br>&nbsp;&nbsp;&nbsp;&nbsp;preview: m.querySelector(\'.preview\').textContent<br>&nbsp;&nbsp;}));<br>&nbsp;&nbsp;ReactNativeWebView.postMessage(JSON.stringify(data));<br>`)</code>'
+    },
+    'nhs-reading': {
+        title: 'Reading a Message — Progressive Audio',
+        steps: [
+            { text: '<strong>Full message loaded in WebView.</strong> Injected JS extracts the complete message body text (paragraphs, line by line).' },
+            { text: '<strong>Text sent to GPT-4o-mini</strong> for optional summarisation. User can choose: <em>"Read full message"</em> or <em>"Give me a summary"</em>.' },
+            { text: '<strong>expo-speech reads progressively.</strong> The currently-being-read sentence is highlighted in yellow in the WebView (via injected CSS). Progress bar shows position.' },
+            { text: '<strong>Voice controls during reading:</strong><br>• "Pause" / "Resume" — pauses TTS<br>• "Repeat" — re-reads current paragraph<br>• "Summary" — GPT summarises remainder<br>• "Reply" — triggers reply flow' },
+            { text: '<strong>Reply flow:</strong> User says "Reply: Thank you, I\'ll book an appointment." → speech-to-text → injected into the reply form in WebView → confirmed by voice → submitted.' }
+        ],
+        tags: ['webview', 'voice', 'ai'],
+        note: 'The yellow highlight follows along as text is read — like a karaoke display. This helps partially sighted users follow along while hearing the content.',
+        tech: '<strong>Summary example:</strong> A 200-word GP message becomes: <em>"Dr. Williams says your blood test results are normal. Cholesterol and HbA1c are fine. Your Vitamin D is slightly low — she recommends a supplement. She suggests booking an appointment to discuss."</em> — 3 sentences instead of 6 paragraphs.'
+    },
+    'nhs-rx': {
+        title: 'Prescription Request — Voice Confirmation',
+        steps: [
+            { text: '<strong>WebView loads prescriptions page.</strong> Injected JS extracts medication list with names, doses, and availability status.' },
+            { text: '<strong>App speaks the list:</strong> <em>"You have 3 prescriptions. Metformin 500mg — available to request. Atorvastatin 20mg — available. Ramipril 5mg — already requested on the 5th."</em>' },
+            { text: '<strong>User says: "Request Metformin"</strong> → GPT matches to the correct medication from the extracted list.' },
+            { text: '<strong>Confirmation overlay appears:</strong> App reads the confirmation aloud: <em>"I\'ll request Metformin 500mg, twice daily. This usually takes 2-3 working days. Say Yes to confirm or Cancel."</em>' },
+            { text: '<strong>User says "Yes"</strong> → injected JS clicks the "Request" button in the WebView for that medication → monitors for success page → announces: <em>"Done. Metformin has been requested. You\'ll receive a notification when it\'s ready."</em>' }
+        ],
+        tags: ['webview', 'voice', 'ai'],
+        note: 'The critical safety feature: every action requires voice confirmation before execution. The app never submits a prescription request without explicit "Yes."',
+        tech: '<strong>WebView automation:</strong> The injected JS finds the correct "Request" button by matching the medication name, then triggers a click event. This mimics what a sighted user would do manually — tapping the button on the NHS website.'
+    }
+};
+
+function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('screen-' + id)?.classList.add('active');
+
+    document.querySelectorAll('.flow-btn').forEach(b => b.classList.remove('active'));
+    document.querySelector(`.flow-btn[data-screen="${id}"]`)?.classList.add('active');
+
+    // Update description
+    const desc = descriptions[id];
+    if (!desc) return;
+
+    const tagsHtml = (desc.tags || []).map(t => {
+        const labels = { native: 'Native', webview: 'WebView', ai: 'AI/GPT', voice: 'Voice' };
+        return `<span class="tag tag-${t}">${labels[t]}</span>`;
+    }).join('');
+
+    const stepsHtml = desc.steps.map((s, i) => `
+        <div class="desc-step">
+            <div class="desc-num">${i + 1}</div>
+            <div class="desc-text">${s.text}</div>
+        </div>
+    `).join('');
+
+    document.getElementById('descPanel').innerHTML = `
+        <div style="margin-bottom:12px">${tagsHtml}</div>
+        <div class="desc-title">${desc.title}</div>
+        ${stepsHtml}
+        ${desc.note ? `<div class="desc-divider"></div><div class="desc-note">💡 ${desc.note}</div>` : ''}
+        ${desc.tech ? `<div class="desc-tech">${desc.tech}</div>` : ''}
+    `;
+
+    // Update tab bar
+    const tabMap = {
+        'home': 'home',
+        'nav-listen': 'nav-listen', 'journey': 'nav-listen',
+        'nhs-login': 'nhs-login', 'nhs-messages': 'nhs-login',
+        'nhs-reading': 'nhs-login', 'nhs-rx': 'nhs-login'
+    };
+    document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+    document.querySelector(`.tab-item[data-tab="${tabMap[id] || 'home'}"]`)?.classList.add('active');
+}
+
+// Flow nav buttons
+document.querySelectorAll('.flow-btn').forEach(btn => {
+    btn.addEventListener('click', () => showScreen(btn.dataset.screen));
+});
+
+// Big buttons + links
+document.querySelectorAll('[data-goto]').forEach(el => {
+    el.addEventListener('click', () => showScreen(el.dataset.goto));
+});
+
+// Tab bar
+document.querySelectorAll('.tab-item').forEach(tab => {
+    tab.addEventListener('click', () => showScreen(tab.dataset.tab));
+});
+
+// Init
+showScreen('home');
+</script>
+</body>
+</html>
