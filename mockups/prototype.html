@@ -468,6 +468,7 @@
             padding: 50px 14px 14px;
         }
         .rx-confirm {
+
             background: rgba(0,127,59,0.95);
             border-radius: 16px; padding: 14px 16px;
             color: #fff;
@@ -486,6 +487,41 @@
             font-weight: 600; font-size: 13px; text-align: center;
             border: 1px solid rgba(255,255,255,0.3);
         }
+
+        /* ===== SETTINGS SCREEN ===== */
+        .settings-screen {
+            background: linear-gradient(180deg, #0d1117 0%, #161b22 100%);
+            padding: 14px; overflow-y: auto;
+        }
+        .settings-screen .settings-title {
+            font-size: 22px; font-weight: 700; color: #fff; margin-bottom: 20px;
+        }
+        .settings-group { margin-bottom: 18px; }
+        .settings-group-title {
+            font-size: 11px; font-weight: 600; color: #FFD700;
+            text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px;
+        }
+        .setting-item {
+            background: #161b22; border: 1px solid #2d333b;
+            padding: 13px 14px; display: flex;
+            justify-content: space-between; align-items: center;
+        }
+        .setting-item:first-child { border-radius: 10px 10px 0 0; }
+        .setting-item:last-child { border-radius: 0 0 10px 10px; }
+        .setting-item:only-child { border-radius: 10px; }
+        .setting-item + .setting-item { border-top: none; }
+        .setting-label { font-size: 14px; color: #fff; }
+        .setting-value { font-size: 13px; color: #888; }
+        .toggle {
+            width: 42px; height: 22px; background: #4CAF50;
+            border-radius: 11px; position: relative;
+        }
+        .toggle::after {
+            content: ''; width: 18px; height: 18px; background: #fff;
+            border-radius: 50%; position: absolute; top: 2px; right: 2px;
+        }
+        .toggle.off { background: #444; }
+        .toggle.off::after { right: auto; left: 2px; }
 
         /* ===== ARCHITECTURE DIAGRAM ===== */
         .arch-info {
@@ -540,6 +576,7 @@
     <button class="flow-btn" data-screen="nhs-messages">💬 NHS Messages</button>
     <button class="flow-btn" data-screen="nhs-reading">📖 Reading Message</button>
     <button class="flow-btn" data-screen="nhs-rx">💊 Prescriptions</button>
+    <button class="flow-btn" data-screen="settings">⚙️ Settings</button>
 </div>
 
 <div class="flow-section">
@@ -775,6 +812,71 @@
                     </div>
                 </div>
 
+                <!-- SETTINGS -->
+                <div class="screen settings-screen" id="screen-settings">
+                    <div class="settings-title">Settings</div>
+
+                    <div class="settings-group">
+                        <div class="settings-group-title">Voice</div>
+                        <div class="setting-item">
+                            <span class="setting-label">Speech Rate</span>
+                            <span class="setting-value">Medium ›</span>
+                        </div>
+                        <div class="setting-item">
+                            <span class="setting-label">Voice Type</span>
+                            <span class="setting-value">Female (UK) ›</span>
+                        </div>
+                        <div class="setting-item">
+                            <span class="setting-label">Auto-Read Results</span>
+                            <div class="toggle"></div>
+                        </div>
+                    </div>
+
+                    <div class="settings-group">
+                        <div class="settings-group-title">Navigation</div>
+                        <div class="setting-item">
+                            <span class="setting-label">Default Transport</span>
+                            <span class="setting-value">Tube ›</span>
+                        </div>
+                        <div class="setting-item">
+                            <span class="setting-label">Step-Free Only</span>
+                            <div class="toggle"></div>
+                        </div>
+                        <div class="setting-item">
+                            <span class="setting-label">Home Address</span>
+                            <span class="setting-value">Set ›</span>
+                        </div>
+                    </div>
+
+                    <div class="settings-group">
+                        <div class="settings-group-title">Display</div>
+                        <div class="setting-item">
+                            <span class="setting-label">High Contrast</span>
+                            <div class="toggle"></div>
+                        </div>
+                        <div class="setting-item">
+                            <span class="setting-label">Text Size</span>
+                            <span class="setting-value">Extra Large ›</span>
+                        </div>
+                        <div class="setting-item">
+                            <span class="setting-label">Haptic Feedback</span>
+                            <div class="toggle"></div>
+                        </div>
+                    </div>
+
+                    <div class="settings-group">
+                        <div class="settings-group-title">Account</div>
+                        <div class="setting-item">
+                            <span class="setting-label">NHS Login</span>
+                            <span class="setting-value">Connected ✓</span>
+                        </div>
+                        <div class="setting-item">
+                            <span class="setting-label">About Vision Ability</span>
+                            <span class="setting-value">v1.0 ›</span>
+                        </div>
+                    </div>
+                </div>
+
             </div>
             <div class="tab-bar" id="tabBar">
                 <div class="tab-item active" data-tab="home"><span class="tab-icon">🏠</span>Home</div>
@@ -915,6 +1017,19 @@ const descriptions = {
         note: 'The yellow highlight follows along as text is read — like a karaoke display. This helps partially sighted users follow along while hearing the content.',
         tech: '<strong>Summary example:</strong> A 200-word GP message becomes: <em>"Dr. Williams says your blood test results are normal. Cholesterol and HbA1c are fine. Your Vitamin D is slightly low — she recommends a supplement. She suggests booking an appointment to discuss."</em> — 3 sentences instead of 6 paragraphs.'
     },
+    settings: {
+        title: 'Settings — Personalisation',
+        steps: [
+            { text: '<strong>Speech rate &amp; voice:</strong> Adjustable TTS speed (slow → fast) and voice selection (male/female, UK accent). Uses <code>expo-speech</code> configuration.' },
+            { text: '<strong>Auto-read results:</strong> When enabled, journey steps and NHS messages are read aloud automatically without the user needing to say "read it".' },
+            { text: '<strong>Navigation preferences:</strong> Default transport mode (tube/bus/walking), step-free access filter for wheelchair users, and saved home/work addresses for quick navigation.' },
+            { text: '<strong>Display options:</strong> High-contrast mode (increases border widths and colour contrast), extra-large text, and haptic feedback toggles.' },
+            { text: '<strong>All settings are voice-accessible:</strong> User can say <em>"Set speech rate to slow"</em> or <em>"Turn on high contrast"</em> from anywhere in the app.' }
+        ],
+        tags: ['native', 'voice'],
+        note: 'Settings persist via AsyncStorage. The app remembers preferences between sessions. Voice settings apply immediately — the confirmation is spoken in the new voice/speed.',
+        tech: '<strong>Tech:</strong> Zustand state management + AsyncStorage persistence. All toggles and selections stored locally on device. No backend needed.'
+    },
     'nhs-rx': {
         title: 'Prescription Request — Voice Confirmation',
         steps: [
@@ -966,7 +1081,8 @@ function showScreen(id) {
         'home': 'home',
         'nav-listen': 'nav-listen', 'journey': 'nav-listen',
         'nhs-login': 'nhs-login', 'nhs-messages': 'nhs-login',
-        'nhs-reading': 'nhs-login', 'nhs-rx': 'nhs-login'
+        'nhs-reading': 'nhs-login', 'nhs-rx': 'nhs-login',
+        'settings': 'settings'
     };
     document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
     document.querySelector(`.tab-item[data-tab="${tabMap[id] || 'home'}"]`)?.classList.add('active');
